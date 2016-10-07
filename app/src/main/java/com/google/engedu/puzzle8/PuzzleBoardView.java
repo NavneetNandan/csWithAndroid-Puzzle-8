@@ -9,6 +9,9 @@ import android.view.View;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.PriorityQueue;
 import java.util.Random;
 
 public class PuzzleBoardView extends View {
@@ -80,5 +83,28 @@ public class PuzzleBoardView extends View {
     }
 
     public void solve() {
+        PriorityQueue<PuzzleBoard> boardPriorityQueue=new PriorityQueue<>(1000, new Comparator<PuzzleBoard>() {
+            @Override
+            public int compare(PuzzleBoard lhs, PuzzleBoard rhs) {
+                return lhs.priority()-rhs.priority();
+            }
+        });
+        boardPriorityQueue.add(puzzleBoard);
+        while (!boardPriorityQueue.isEmpty()){
+            PuzzleBoard topBoard=boardPriorityQueue.remove();
+            if (!topBoard.resolved()){
+             boardPriorityQueue.addAll(topBoard.neighbours());
+            }else {
+                boardPriorityQueue.clear();
+                ArrayList<PuzzleBoard> solutionBoards=new ArrayList<>();
+                while (topBoard.previousBoard!=null){
+                    solutionBoards.add(topBoard);
+                    topBoard=topBoard.previousBoard;
+                }
+                Collections.reverse(solutionBoards);
+                animation=solutionBoards;
+                invalidate();
+            }
+        }
     }
 }

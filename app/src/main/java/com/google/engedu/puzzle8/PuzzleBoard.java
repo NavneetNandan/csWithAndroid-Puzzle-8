@@ -2,8 +2,11 @@ package com.google.engedu.puzzle8;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.PriorityQueue;
 
 
 public class PuzzleBoard {
@@ -16,6 +19,8 @@ public class PuzzleBoard {
             { 0, 1 }
     };
     private ArrayList<PuzzleTile> tiles;
+    PuzzleBoard previousBoard;
+    int steps;
 
     PuzzleBoard(Bitmap bitmap, int parentWidth) {
         bitmap=Bitmap.createScaledBitmap(bitmap,parentWidth,parentWidth,false);
@@ -29,9 +34,13 @@ public class PuzzleBoard {
         }
         tiles.remove(8);
         tiles.add(null);
+        steps=0;
+        previousBoard=null;
     }
 
     PuzzleBoard(PuzzleBoard otherBoard) {
+        steps=otherBoard.steps+1;
+        this.previousBoard =otherBoard;
         tiles = (ArrayList<PuzzleTile>) otherBoard.tiles.clone();
     }
 
@@ -108,10 +117,10 @@ public class PuzzleBoard {
             PuzzleTile tile=tiles.get(k);
             if (tile==null){
                 ArrayList<PuzzleBoard> neighbours=new ArrayList<>();
-                for (int i = 0; i <NEIGHBOUR_COORDS.length ; i++) {
-                    if (k/3+NEIGHBOUR_COORDS[i][1]<3&&k/3+NEIGHBOUR_COORDS[i][1]>=0&&k%3+NEIGHBOUR_COORDS[i][0]<3&&k%3+NEIGHBOUR_COORDS[i][0]>=0){
-                        PuzzleBoard temp=new PuzzleBoard(this);
-                        temp.swapTiles(k,k+NEIGHBOUR_COORDS[i][0]+NUM_TILES*NEIGHBOUR_COORDS[i][1]);
+                for (int[] NEIGHBOUR_COORD : NEIGHBOUR_COORDS) {
+                    if (k / 3 + NEIGHBOUR_COORD[1] < 3 && k / 3 + NEIGHBOUR_COORD[1] >= 0 && k % 3 + NEIGHBOUR_COORD[0] < 3 && k % 3 + NEIGHBOUR_COORD[0] >= 0) {
+                        PuzzleBoard temp = new PuzzleBoard(this);
+                        temp.swapTiles(k, k + NEIGHBOUR_COORD[0] + NUM_TILES * NEIGHBOUR_COORD[1]);
                         neighbours.add(temp);
                     }
                 }
@@ -122,7 +131,18 @@ public class PuzzleBoard {
     }
 
     public int priority() {
-        return 0;
+        int manhattanDistance=0;
+        for (int i = 0; i <tiles.size() ; i++) {
+            if(tiles.get(i)!=null) {
+                int columnChange = Math.abs(i % 3 - tiles.get(i).getNumber() % 3);
+                int rowChange = Math.abs(i / 3 - tiles.get(i).getNumber() / 3);
+                manhattanDistance+= columnChange+rowChange;
+            }else {
+                int columnChange = Math.abs(i % 3 - 8 % 3);
+                int rowChange = Math.abs(i / 3 - 8 / 3);
+            }
+        }
+        return manhattanDistance+steps;
     }
 
 }
