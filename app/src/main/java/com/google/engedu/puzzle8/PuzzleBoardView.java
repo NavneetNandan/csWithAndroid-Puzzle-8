@@ -89,6 +89,7 @@ public class PuzzleBoardView extends View {
                 return lhs.priority()-rhs.priority();
             }
         });
+        puzzleBoard.steps = 0; puzzleBoard.previousBoard = null;
         boardPriorityQueue.add(puzzleBoard);
         while (!boardPriorityQueue.isEmpty()){
             PuzzleBoard topBoard=boardPriorityQueue.remove();
